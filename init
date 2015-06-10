@@ -214,14 +214,14 @@ for x in $(cat /proc/cmdline); do
 	recovery)
 		recovery=y
 		;;
+	storagemedia=nand)
+                insmod /lib/modules/rk30xxnand_ko.ko.`uname -r`
+		;;
 	esac
 done
 
-case "$ROOT" in
-	*mtd*)
-		#insmod /rk30xxnand-3.0.36+.ko
-		;;
-esac
+# turn on HDMI early
+echo 1 > /sys/class/display/HDMI/enable
 
 if [ -n "${noresume}" ]; then
 	export noresume
