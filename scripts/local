@@ -15,9 +15,11 @@ pre_mountroot()
 	while [ -z "${FSTYPE}" ]; do
         tmp_count=1
         while ! wait-for-root "${ROOT}" 1; do
+	    tmp_count=$(($tmp_count+1))
             if [ $tmp_count -gt ${ROOTDELAY:-30} ]; then
                 break
             fi
+	    echo "wait-for-root ${ROOT}, retry $tmp_count..."
         done
         unset tmp_count
  		FSTYPE=$(wait-for-root "${ROOT}" 1)
