@@ -254,6 +254,23 @@ maybe_break premount
 run_scripts /scripts/init-premount
 [ "$quiet" != "y" ] && log_end_msg
 
+DO_CHROOT=
+if [ -e /dev/block/mtd/by-name/misc ]; then
+    if head -c 48k /dev/block/mtd/by-name/misc \
+	| grep -q firefly-linux 2>/dev/null; then
+	# switch to linux, nothing to do
+	:
+    elif [ $(head -c 2 /dev/block/mtd/by-name/backup) = $(echo -e "\x1f\x8b") ]; then
+	# backup partition has ramdisk-recovery.img
+	ROOT=/dev/block/mtd/by-name/backup
+	echo "Switch to android recovery: $ROOT"
+	zcat ${ROOT} | (cd ${rootmnt} ; cpio -i)
+	init=/init
+	DO_CHROOT=1
+    fi
+fi
+
+if [ -z "$DO_CHROOT" ]; then
 maybe_break mount
 log_begin_msg "Mounting root file system"
 . /scripts/${BOOT}
@@ -261,6 +278,7 @@ parse_numeric ${ROOT}
 maybe_break mountroot
 mountroot
 log_end_msg
+fi
 
 maybe_break bottom
 [ "$quiet" != "y" ] && log_begin_msg "Running /scripts/init-bottom"
@@ -359,5 +377,11 @@ unset resume
 unset resume_offset
 
 # Chain to real filesystem
+#PS1='(break) ' /bin/sh -i </dev/console >/dev/console 2>&1
+if [ -n "${DO_CHROOT}" ]; then
+unset DO_CHROOT
+exec chroot ${rootmnt} ${init} <${rootmnt}/dev/console >${rootmnt}/dev/console 2>&1
+else
 exec run-init ${rootmnt} ${init} "$@" ${recovery:+--startup-event=recovery} <${rootmnt}/dev/console >${rootmnt}/dev/console 2>&1
+fi
 panic "Could not execute run-init."
