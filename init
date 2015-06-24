@@ -231,7 +231,7 @@ else
 fi
 
 # get the serial console if we want to debug
-[ "$debug" = "y" ] && /sbin/getty 115200 ttyFIQ0 &
+# [ "$debug" = "y" ] && /sbin/getty 115200 ttyFIQ0 &
 
 maybe_break top
 
