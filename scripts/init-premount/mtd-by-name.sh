@@ -18,6 +18,12 @@ if [ -d /sys/class/mtd/ ]; then
 	    i=${i%/name}
 	    ln -s /dev/mtdblock${i} /dev/block/mtd/by-name/${name}
     done
+elif [ -d /sys/class/misc/rknand_sys_storage ]; then
+    # /dev/rknand_*
+    for i in `ls /dev/rknand_* 2>/dev/null`; do
+        name=${i##/dev/rknand_}
+        ln -s ${i} /dev/block/mtd/by-name/${name}
+    done
 elif [ -d /sys/block/mmcblk0/ ]; then
     # emmc
     for i in `ls /sys/block/mmcblk0/mmcblk0p*/volname`; do
@@ -25,12 +31,6 @@ elif [ -d /sys/block/mmcblk0/ ]; then
 	    i=${i##*mmcblk0/}
 	    i=${i%/volname}
 	    ln -s /dev/${i} /dev/block/mtd/by-name/${name}
-    done
-else
-    # /dev/rknand_*
-    for i in `ls /dev/rknand_* 2>/dev/null`; do
-        name=${i##/dev/rknand_}
-        ln -s ${i} /dev/block/mtd/by-name/${name}
     done
 fi
 
