@@ -28,12 +28,12 @@ elif [ -d /sys/class/misc/rknand_sys_storage ]; then
 		name=${i##/dev/block/rknand_}
 		ln -s ${i} /dev/block/mtd/by-name/${name}
 	done     
-elif [ -d /sys/block/mmcblk0/ ]; then
+elif [ -d /sys/block/mmcblk?/ ]; then
     # emmc
-    for i in `ls /sys/block/mmcblk0/mmcblk0p*/uevent`; do
+    for i in `ls /sys/block/mmcblk?/mmcblk*p*/uevent`; do
 	    name=`cat ${i} | grep PARTNAME`
         name=${name##PARTNAME=} 
-	    i=${i##*mmcblk0/}
+	    i=${i##*mmcblk?/}
 	    i=${i%/uevent}
 		[ -e /dev/block/${i} ] && ln -s /dev/block/${i} /dev/block/mtd/by-name/${name}
 		[ -e /dev/${i} ] && ln -s /dev/${i} /dev/block/mtd/by-name/${name}
